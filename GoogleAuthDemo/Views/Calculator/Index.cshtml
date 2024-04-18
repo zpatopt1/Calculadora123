@@ -1,0 +1,105 @@
+@{
+    ViewData["Title"] = "Calculator";
+}
+
+<h2>Calculator</h2>
+
+<div style="max-width: 300px; margin: 0 auto;">
+    <input type="text" id="result" style="width: 100%; text-align: right; padding: 10px; margin-bottom: 10px;" readonly />
+    <div id="message" style="margin-bottom: 10px; text-align: center;"></div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;">
+        <button onclick="appendNumber('1')" style="padding: 15px;">1</button>
+        <button onclick="appendNumber('2')" style="padding: 15px;">2</button>
+        <button onclick="appendNumber('3')" style="padding: 15px;">3</button>
+        <button onclick="setOperator('+')" style="padding: 15px; background-color: #4CAF50; color: white;">+</button>
+        <button onclick="appendNumber('4')" style="padding: 15px;">4</button>
+        <button onclick="appendNumber('5')" style="padding: 15px;">5</button>
+        <button onclick="appendNumber('6')" style="padding: 15px;">6</button>
+        <button onclick="setOperator('-')" style="padding: 15px; background-color: #4CAF50; color: white;">-</button>
+        <button onclick="appendNumber('7')" style="padding: 15px;">7</button>
+        <button onclick="appendNumber('8')" style="padding: 15px;">8</button>
+        <button onclick="appendNumber('9')" style="padding: 15px;">9</button>
+        <button onclick="setOperator('*')" style="padding: 15px; background-color: #4CAF50; color: white;">*</button>
+        <button onclick="appendNumber('0')" style="padding: 15px;">0</button>
+        <button onclick="addDecimalPoint()" style="padding: 15px;">.</button>
+        <button onclick="clearInput()" style="padding: 15px; background-color: #f44336; color: white;">C</button>
+         <button onclick="setOperator('/')" style="padding: 15px; background-color: #4CAF50; color: white;">/</button>
+        <button onclick="calculate()" style="padding: 15px; background-color: #2196F3; color: white;">=</button>
+        
+    </div>
+</div>
+
+<script>
+    let currentNumber = '';
+    let operator = '';
+    let result = null;
+
+    function appendNumber(num) {
+        currentNumber += num;
+        document.getElementById('result').value = currentNumber;
+    }
+
+    function addDecimalPoint() {
+        // Verifica se já existe um ponto decimal
+        if (!currentNumber.includes('.')) {
+            currentNumber += '.';
+            document.getElementById('result').value = currentNumber;
+        }
+    }
+
+    function setOperator(op) {
+    if (currentNumber !== '') {
+        if (result === null) {
+            result = parseFloat(currentNumber);
+        } else {
+            calculate(); // Calcula o resultado antes de mudar o operador
+        }
+    }
+    operator = op;
+    currentNumber = '';
+}
+
+    function clearInput() {
+    currentNumber = '';
+    operator = '';
+    result = null;
+    document.getElementById('result').value = '';
+    document.getElementById('message').innerText = '';
+}
+
+    function calculate() {
+        let current = parseFloat(currentNumber);
+        switch (operator) {
+            case '+':
+                result = parseFloat((result + current).toFixed(10)); // Soma os números e arredonda para 10 casas decimais
+                break;
+            case '-':
+                result = parseFloat((result - current).toFixed(10)); // Subtrai os números e arredonda para 10 casas decimais
+                break;
+            case '*':
+                result = parseFloat((result * current).toFixed(10)); // Multiplica os números e arredonda para 10 casas decimais
+                break;
+            case '/':
+                if (current !== 0) {
+                    result = parseFloat((result / current).toFixed(10)); // Divide os números e arredonda para 10 casas decimais
+                } else {
+                    document.getElementById('message').innerText = 'Erro: Divisão por zero.';
+                    return;
+                }
+                break;
+        }
+        document.getElementById('result').value = result;
+
+        // Exibir mensagem de resultado enviado para o servidor
+        document.getElementById('message').innerText = 'Resultado enviado para o servidor.';
+
+        // Limpar o número atual para a próxima entrada
+        currentNumber = '';
+        operator = ''; // Resetar o operador após o cálculo
+    }
+</script>
+
+
+
+
