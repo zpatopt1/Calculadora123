@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GoogleAuthDemo.Controllers
 {
@@ -12,7 +13,7 @@ namespace GoogleAuthDemo.Controllers
         {
             _logger = logger;
         }
-
+        [Authorize]
         public IActionResult Index()
         {   
             return View();
