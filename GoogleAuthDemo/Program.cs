@@ -31,8 +31,8 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 
 builder.Services.AddControllersWithViews();
 
-// configureLogging();
-// builder.Host.UseSerilog();
+configureLogging();
+builder.Host.UseSerilog();
 
 var app = builder.Build();
 app.UseCookiePolicy(cookiePolicy);
@@ -72,31 +72,31 @@ app.MapRazorPages();
 app.Run();
 
 
-// void configureLogging()
-// {
-//     var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+void configureLogging()
+{
+    var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
-//     var configuration = new ConfigurationBuilder()
-//         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-//         .AddJsonFile($"appsettings.{environment}.json", optional: true).Build();
+    var configuration = new ConfigurationBuilder()
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        .AddJsonFile($"appsettings.{environment}.json", optional: true).Build();
 
-//         Log.Logger = new LoggerConfiguration()
-//         .Enrich.FromLogContext()
-//         .Enrich.WithExceptionDetails()
-//         .WriteTo.Debug()
-//         .WriteTo.Console() 
-//         .WriteTo.Elasticsearch(ConfigureElasticSink(configuration, environment))
-//         .Enrich.WithProperty("Environment", environment)
-//         .ReadFrom.Configuration(configuration)
-//         .CreateLogger();
-// }
+        Log.Logger = new LoggerConfiguration()
+        .Enrich.FromLogContext()
+        .Enrich.WithExceptionDetails()
+        .WriteTo.Debug()
+        .WriteTo.Console() 
+        .WriteTo.Elasticsearch(ConfigureElasticSink(configuration, environment))
+        .Enrich.WithProperty("Environment", environment)
+        .ReadFrom.Configuration(configuration)
+        .CreateLogger();
+}
 
-// ElasticsearchSinkOptions ConfigureElasticSink(IConfigurationRoot configuration, string environment){
-//     return new ElasticsearchSinkOptions (new Uri(configuration["ElasticConfiguration:Uri"])){
-//         AutoRegisterTemplate = true,
-//         IndexFormat = $"{Assembly.GetExecutingAssembly().GetName().Name.ToLower().Replace(".","-")}-{environment.ToLower()}-{DateTime.UtcNow:yyyy-MM}",
-//         NumberOfReplicas = 1,
-//         NumberOfShards = 2,
+ElasticsearchSinkOptions ConfigureElasticSink(IConfigurationRoot configuration, string environment){
+    return new ElasticsearchSinkOptions (new Uri(configuration["ElasticConfiguration:Uri"])){
+        AutoRegisterTemplate = true,
+        IndexFormat = $"{Assembly.GetExecutingAssembly().GetName().Name.ToLower().Replace(".","-")}-{environment.ToLower()}-{DateTime.UtcNow:yyyy-MM}",
+        NumberOfReplicas = 1,
+        NumberOfShards = 2,
 
-//     };
-// }
+    };
+}
