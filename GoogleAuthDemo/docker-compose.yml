@@ -9,6 +9,8 @@ services:
       - "8000:80"
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
+    networks:
+      - elastic
 
 
   prometheus:
@@ -26,7 +28,7 @@ services:
       - "3001:3000"
     depends_on:
       - prometheus
-    
+      
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.7.0
     ports:
@@ -36,8 +38,17 @@ services:
       discovery.type: "single-node"
       ES_JAVA_OPTS: "-Xms2g -Xmx2g"
       xpack.monitoring.enabled: "true"
+      xpack.watcher.enabled: "false"
+      cluster.routing.allocation.disk.threshold_enabled: "false"
     volumes:
       - ./esdata:/usr/share/elasticsearch/data
+    networks:
+      - elastic
+
+      # cluster.routing.allocation.disk.threshold_enabled: "true"
+      # cluster.routing.allocation.disk.watermark.low: "85%"
+      # cluster.routing.allocation.disk.watermark.high: "90%"
+
       
   kibana:
     image: docker.elastic.co/kibana/kibana:7.7.0
@@ -47,7 +58,14 @@ services:
       ELASTICSEARCH_URL: http://elasticsearch:9200
     depends_on:
       - elasticsearch
-      
+    networks:
+      - elastic
+  
+networks:
+  elastic:
+    driver: bridge
+
+
 volumes:
   esdata:
     driver: local

@@ -16,7 +16,9 @@ namespace GoogleAuthDemo.Controllers
         [Authorize]
         public IActionResult Index()
         {   
+                     _logger.LogInformation("teste13131");
             return View();
+            
         }
 
         [HttpPost]
