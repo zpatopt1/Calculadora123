@@ -34,7 +34,7 @@
     let currentNumber = '';
     let operator = '';
     let result = null;
-    let history = []; // Variável para armazenar o histórico
+    let history = []; 
 
     function appendNumber(num) {
         currentNumber += num;
@@ -70,8 +70,7 @@
 
     function calculate() {
         let current = parseFloat(currentNumber);
-        let expression = '"' result + operator + currentNumber '"'; // Construa a expressão com aspas duplas 
-
+        let expression =  result + ' ' + operator + ' ' + currentNumber ; // Construa a expressão
         switch (operator) {
             case '+':
                 result = parseFloat((result + current).toFixed(10)); // Soma os números e arredonda para 10 casas decimais
@@ -94,7 +93,7 @@
         document.getElementById('result').value = result;
 
         // Adiciona o cálculo ao histórico
-        history = expression
+        history.push(expression); 
 
         // Exibir mensagem de resultado enviado para o servidor
         document.getElementById('message').innerText = 'Resultado enviado para o servidor.';
@@ -109,7 +108,7 @@
     // Crie um objeto com os dados a serem enviados
     const data = {
         result: result,
-        history: history
+        history: "history"
     };
 
     // Faça uma requisição HTTP POST para o controller
@@ -139,13 +138,12 @@
   function calculateAndSendResult() {
         calculate(); // Calcula o resultado
         let latestCalculation = history[history.length - 1]; // Pega o cálculo mais recente
-        console.log(result);
         console.log(history);
-        sendResultToController( history, result);         // Envia o cálculo para o servidor
+        console.log(result);
+        sendResultToController(result, history);         // Envia o cálculo para o servidor
     }
 
 </script>
-
 
 
 

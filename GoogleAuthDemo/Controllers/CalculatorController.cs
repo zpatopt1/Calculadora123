@@ -42,8 +42,6 @@ namespace GoogleAuthDemo.Controllers
             double result = model.Result;
             string history = model.History;
 
-                _logger.LogInformation("Dados enviados para teste: {result}", result);
-                _logger.LogInformation("Dados enviados para teste: {history}", history);
             try
             {
                 using (var connection = new SqlConnection(_connectionString))
