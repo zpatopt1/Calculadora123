@@ -43,13 +43,8 @@ services:
     depends_on:
       - prometheus
     volumes:
-<<<<<<< Updated upstream
       - ./grafana_data:/var/lib/grafana
 
-=======
-      - grafana_data:/var/lib/grafana
-    
->>>>>>> Stashed changes
       
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.7.0
@@ -86,21 +81,14 @@ services:
 networks:
   elastic:
     driver: bridge
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 volumes:
   esdata:
     driver: local
   grafana_data:
     driver: local
-<<<<<<< Updated upstream
 
 
 
-=======
->>>>>>> Stashed changes
 # version: '3.8'
 
 # services:
