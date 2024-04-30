@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using GoogleAuthDemo.Models;
+
 
 namespace GoogleAuthDemo.Data
 {
@@ -9,5 +11,7 @@ namespace GoogleAuthDemo.Data
             : base(options)
         {
         }
+
+        public DbSet<ResultModel> Results { get; set; }
     }
 }

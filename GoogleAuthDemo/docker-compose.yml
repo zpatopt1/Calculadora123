@@ -72,6 +72,8 @@ networks:
 volumes:
   esdata:
     driver: local
+  grafana_data:
+    driver: local
 # version: '3.8'
 
 # services:

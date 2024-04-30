@@ -50,6 +50,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseHttpMetrics();
+app.UseMetricServer();
 
 
 app.UseAuthorization();
