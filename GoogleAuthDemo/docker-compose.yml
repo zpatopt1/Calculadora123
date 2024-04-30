@@ -18,9 +18,9 @@ services:
       context: .
       dockerfile: dockerfile2
     ports:
-      - "9000:9000"
+      - "9999:9999"
     environment:
-      - PORT=9000
+      - PORT=9999
       - ASPNETCORE_ENVIRONMENT=Development
     networks:
       - elastic
