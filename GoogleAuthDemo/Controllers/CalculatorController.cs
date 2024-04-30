@@ -15,7 +15,6 @@ namespace GoogleAuthDemo.Controllers
 
     public class CalculatorController : Controller
     {
-        // Declare e inicialize uma métrica
        
         private static readonly Counter _sentDataCounter = Metrics.CreateCounter("data_sent_total", "Total number of data sent to the database");
         private static readonly Histogram _sendDataDuration = Metrics.CreateHistogram("data_send_duration_seconds", "Duration of sending data to the database");

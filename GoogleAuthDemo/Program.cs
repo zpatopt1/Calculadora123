@@ -1,4 +1,5 @@
 using System.Reflection;
+using Elastic.Apm.AspNetCore;
 using GoogleAuthDemo.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,10 @@ using Serilog.Sinks.Elasticsearch;
 CookiePolicyOptions cookiePolicy = new CookiePolicyOptions() { Secure = CookieSecurePolicy.Always, MinimumSameSitePolicy = SameSiteMode.None };
 
 var builder = WebApplication.CreateBuilder(args);
+
+
 var configuration = builder.Configuration;
+
 
 
 builder.Services.AddAuthentication().AddGoogle(googleOptions =>
@@ -26,16 +30,20 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+
+
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddControllersWithViews();
 
 configureLogging();
+
 builder.Host.UseSerilog();
 
 var app = builder.Build();
 app.UseCookiePolicy(cookiePolicy);
+
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
@@ -54,7 +62,7 @@ app.UseMetricServer();
 
 
 app.UseAuthorization();
-
+app.UseElasticApm(builder.Configuration);
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(
