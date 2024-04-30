@@ -8,9 +8,23 @@ services:
     ports:
       - "8000:80"
     environment:
-      ASPNETCORE_ENVIRONMENT: "Development"
+      - PORT=8000
+      - ASPNETCORE_ENVIRONMENT=Development
     networks:
       - elastic
+
+  nova_calculadora:
+    build:
+      context: .
+      dockerfile: dockerfile2
+    ports:
+      - "9000:9000"
+    environment:
+      - PORT=9000
+      - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - elastic
+
 
 
   prometheus:
@@ -63,17 +77,19 @@ services:
       - elasticsearch
     networks:
       - elastic
-  
+
 networks:
   elastic:
     driver: bridge
-
 
 volumes:
   esdata:
     driver: local
   grafana_data:
     driver: local
+
+
+
 # version: '3.8'
 
 # services:

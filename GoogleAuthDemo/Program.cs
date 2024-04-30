@@ -69,9 +69,7 @@ app.UseEndpoints(endpoints =>
 });
 
 app.MapRazorPages();
-
 app.Run();
-
 
 void configureLogging()
 {

@@ -29,7 +29,7 @@ namespace GoogleAuthDemo.Controllers
             _connectionString = config.GetConnectionString("DefaultConnection");
             _logger = logger;
         }
-              
+
 
         [Authorize]
         public IActionResult Index()
@@ -59,18 +59,28 @@ namespace GoogleAuthDemo.Controllers
                         command.CommandText = "INSERT INTO Results (Result, History) VALUES (@Result, @History)";
                         command.Parameters.AddWithValue("@Result", result);
                         command.Parameters.AddWithValue("@History", history);
-                        command.ExecuteNonQuery();
+
+                        // Medir a duração da operação
+                        var timer = _sendDataDuration.WithLabels("insert_result").NewTimer();
+                        try
+                        {
+                            command.ExecuteNonQuery();
+                        }
+                        finally
+                        {
+                            timer.ObserveDuration();
+                        }
+                        
                     }
-
-
                     
                     // Aqui você pode salvar o resultado no banco de dados
+                    _sentDataCounter.Inc();
                     return Ok("enviado com sucesso ");
                 }
 
                 // Retorne uma resposta adequada, por exemplo:
-                _sentDataCounter.Inc();
-                return Ok("Resultado salvo com sucesso na base de dados.");
+                //_sentDataCounter.Inc();
+                //return Ok("Resultado salvo com sucesso na base de dados.");
             }
             catch (Exception ex)
             {
