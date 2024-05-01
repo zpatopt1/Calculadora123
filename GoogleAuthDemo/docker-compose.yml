@@ -8,24 +8,20 @@ services:
     ports:
       - "8000:80"
     environment:
-      - PORT=8000
       - ASPNETCORE_ENVIRONMENT=Development
     networks:
       - elastic
 
-  nova_calculadora:
+  calculadora2:
     build:
-      context: .
-      dockerfile: dockerfile2
+      context: C:\Users\pedro\Documents\GitHub\Calculadora123\Calculadora123\GoogleAuthDemo
+      dockerfile: dockerfile
     ports:
-      - "9999:9999"
+      - "9040:9040"
     environment:
-      - PORT=9999
       - ASPNETCORE_ENVIRONMENT=Development
     networks:
       - elastic
-
-
 
   prometheus:
     image: prom/prometheus
