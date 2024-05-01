@@ -58,14 +58,14 @@ namespace GoogleAuthDemo.Controllers
                         command.Parameters.AddWithValue("@History", history);
 
                         // Medir a duração da operação
-                        var timer = _sendDataDuration.WithLabels("insert_result").NewTimer();
+                        // var timer = _sendDataDuration.WithLabels("insert_result").NewTimer();
                         try
                         {
                             command.ExecuteNonQuery();
                         }
                         finally
                         {
-                            timer.ObserveDuration();
+                            //timer.ObserveDuration();
                         }
                         
                     }
