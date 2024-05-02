@@ -12,9 +12,10 @@ services:
     networks:
       - elastic
 
+
   calculadora2:
     build:
-      context: C:\Users\pedro\Documents\GitHub\Calculadora123\Calculadora123\GoogleAuthDemo
+      context: C:\Users\pedro\Documents\GitHub\Calculadora123\Calculadora1234\GoogleAuthDemo
       dockerfile: dockerfile
     ports:
       - "9040:9040"

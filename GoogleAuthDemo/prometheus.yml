@@ -13,4 +13,4 @@ scrape_configs:
 
   - job_name: 'nova-calculadora'  # Adicione o job para a nova calculadora
     static_configs:
-      - targets: ['localhost:9000']  # Substitua pelo endereço e porta da nova calculadora
+      - targets: ['host.docker.internal:9040']  # Substitua pelo endereço e porta da nova calculadora
