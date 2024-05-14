@@ -8,24 +8,40 @@ using Prometheus;
 using Serilog;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
+using Nest;
+using Serilog.Formatting.Elasticsearch;
+using Amazon.Runtime;
+using Elastic.CommonSchema.Serilog;
+using Elastic.Apm.SerilogEnricher;
+using Microsoft.Extensions.Logging;
+
 
 CookiePolicyOptions cookiePolicy = new CookiePolicyOptions() { Secure = CookieSecurePolicy.Always, MinimumSameSitePolicy = SameSiteMode.None };
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 var configuration = builder.Configuration;
 
+
 Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(configuration)
     .Enrich.FromLogContext()
+    .Enrich.WithMachineName()
+    .Enrich.WithEnvironmentUserName()
     .Enrich.WithExceptionDetails()
-    .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://localhost:9200"))
+    .Enrich.WithProperty("ApplicationName", $"{Assembly.GetEntryAssembly()?.GetName().Name} - {builder.Configuration["DOTNET_ENVIRONMENT"]}")
+    .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(configuration["ElasticsearchSettings:uri"]))
     {
-        IndexFormat = "your-index-prefix-{0:yyyy.MM.dd}",
-        AutoRegisterTemplate = true
+        CustomFormatter = new EcsTextFormatter(),
+        AutoRegisterTemplate = true,
+        IndexFormat = "indexlogs",
+      /*  ModifyConnectionSettings = x => x.BasicAuthentication(configuration["ElasticsearchSettings:username"], configuration["ElasticsearchSettings:password"])*/
     })
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
     .CreateLogger();
 
+builder.Logging.ClearProviders();
+builder.Host.UseSerilog(Log.Logger, true);
 
 builder.Services.AddAuthentication().AddGoogle(googleOptions =>
 {
@@ -64,8 +80,9 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseHttpMetrics();
 app.UseMetricServer();
+app.UseSerilogRequestLogging(); 
 
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>

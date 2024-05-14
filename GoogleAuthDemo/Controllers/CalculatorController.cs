@@ -7,6 +7,10 @@ using System.Data.SqlClient;
 using Microsoft.Build.Framework;
 using Microsoft.Data.SqlClient;
 using GoogleAuthDemo.Models;
+using GoogleAuthDemo.Data;
+using Nest;
+
+
 
 
 
@@ -15,18 +19,17 @@ namespace GoogleAuthDemo.Controllers
 
     public class CalculatorController : Controller
     {
-       
-        private static readonly Counter _sentDataCounter = Metrics.CreateCounter("data_sent_total", "Total number of data sent to the database");
-        private static readonly Histogram _sendDataDuration = Metrics.CreateHistogram("data_send_duration_seconds", "Duration of sending data to the database");
-
-        private readonly string _connectionString;
+    
+        private readonly ApplicationDbContext _context;
         private readonly ILogger<CalculatorController> _logger;
+        private readonly IElasticClient _elasticClient;
 
         // Injeção de Dependência do IConfiguration e ILogger
-        public CalculatorController(IConfiguration config, ILogger<CalculatorController> logger)
+        public CalculatorController(ApplicationDbContext context, ILogger<CalculatorController> logger, IElasticClient elasticClient)
         {
-            _connectionString = config.GetConnectionString("DefaultConnection");
+            _context = context;
             _logger = logger;
+            _elasticClient = elasticClient;
         }
 
 
@@ -42,75 +45,145 @@ namespace GoogleAuthDemo.Controllers
             double result = model.Result;
             string history = model.History;
 
-            try
+         try
             {
-                using (var connection = new SqlConnection(_connectionString))
-                {
-                    connection.Open();
+                // Save to SQL Server using Entity Framework Core
+     
+                _logger.LogInformation("Dados enviados para teste: {result}", result);
+                _logger.LogInformation("Conta efetuada: {history}", history);
 
-                    _logger.LogInformation("Dados enviados para teste: {result}", result);
-                    _logger.LogInformation("Conta efetuada: {history}", history);
-                        
-                    using (var command = connection.CreateCommand())
-                    {
-                        command.CommandText = "INSERT INTO Results (Result, History) VALUES (@Result, @History)";
-                        command.Parameters.AddWithValue("@Result", result);
-                        command.Parameters.AddWithValue("@History", history);
-
-                        // Medir a duração da operação
-                        // var timer = _sendDataDuration.WithLabels("insert_result").NewTimer();
-                        try
-                        {
-                            command.ExecuteNonQuery();
-                        }
-                        finally
-                        {
-                            //timer.ObserveDuration();
-                        }
-                        
-                    }
-                    
-                    // Aqui você pode salvar o resultado no banco de dados
-                    _sentDataCounter.Inc();
-                    return Ok("enviado com sucesso ");
-                }
-
-                // Retorne uma resposta adequada, por exemplo:
-                //_sentDataCounter.Inc();
-                //return Ok("Resultado salvo com sucesso na base de dados.");
+                return Ok("enviado com sucesso");
             }
             catch (Exception ex)
             {
-                // Log or handle the exception accordingly
                 _logger.LogError(ex, "Erro ao salvar o resultado na base de dados.");
                 return StatusCode(500, "Ocorreu um erro ao salvar o resultado na base de dados.");
             }
-        }
-// [HttpPost]
-// public IActionResult SendToDataBase([FromBody] object requestBody)
-// {
-//     try
-//     {
-//         _logger.LogInformation("Corpo da solicitação recebido: {requestBody}", requestBody);
-        
-//         // Converta requestBody para o tipo adequado, se necessário
-//         double result = Convert.ToDouble(requestBody); // Exemplo de conversão para double
+           
+    {
+                /*   
+                 *    namespace GoogleAuthDemo.Modelspublic class ResultModel
+                        {
+                            public int Id { get; set; } // Propriedade de identificação única
+                            public double Result { get; set; } // Propriedade para armazenar o resultado
+                            public string History { get; set; } // Propriedade para armazenar as contas
+                                                                // Outras propriedades, se necessário
 
-//         using (var connection = new SqlConnection(_connectionString))
-//         {
-//             // connection.Open();
-//             // _logger.LogInformation("Dados enviados para teste: {result}", result);
-//             // // Aqui você pode salvar o resultado no banco de dados
-//             return Ok(new { message = "enviado com sucesso" }); // Resposta como objeto JSON
-//         } 
-//     }
-//     catch (Exception ex)
-//     {
-//         // Log or handle the exception accordingly
-//         // _logger.LogError(ex, "Erro ao salvar o resultado na base de dados.");
-//         return StatusCode(500, new { error = "Ocorreu um erro ao salvar o resultado na base de dados." }); // Resposta como objeto JSON
-//     }
-// }
+                            // Se você estiver usando Entity Framework Core, você pode precisar de uma convenção específica
+                            // para que o Entity Framework Core reconheça a propriedade de chave primária automaticamente.
+                            // Caso contrário, você pode decorar a propriedade Id com a anotação [Key].
+                        }
+                using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+                using Microsoft.EntityFrameworkCore;
+                using GoogleAuthDemo.Models;
+
+
+                namespace GoogleAuthDemo.Data
+                {
+                    public class ApplicationDbContext : IdentityDbContext
+                    {
+                        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+                            : base(options)
+                        {
+                        }
+
+                        public DbSet<ResultModel> Results { get; set; }
+                    }
+                }
+                    }
+                */
+            }
+        }
+
+        /*   public async Task PostDataSql()
+           {
+               await _context.Database.MigrateAsync();
+               var pessoa = new Pessoa
+               {
+                   DataNascimento = DateTime.Now,
+                   Endereco = "Teste teste teste teste teste teste teste teste teste"
+               };
+
+               for (var i = 0; i < 200; i++)
+               {
+                   pessoa.Id = 
+                   pessoa.Nome = $"Pessoa teste {i}";
+                   _context.Pessoas.Add(pessoa);
+               }
+
+               await _context.SaveChangesAsync();
+
+               var pessoas = _context.Pessoas.Where(p => p.Nome.Contains("Pessoa")).ToList();
+               var enderecos = _context.Pessoas.Where(p => p.Endereco.Contains("teste")).ToList();
+           }
+
+       namespace Sample.ElasticApm.Domain.Model;
+
+       public class ActorsAggregationModel
+       {
+           public double TotalAge { get; set; }
+           public double TotalMovies { get; set; }
+           public double AverageAge { get; set; }
+       }
+
+        [HttpPost("sql")]
+        public async Task<IActionResult> PostSampleSqlAsync()
+        {
+            await _sampleApplication.PostDataSql();
+
+            return Ok();
+
+
+        }
+        using Microsoft.EntityFrameworkCore;
+    using Sample.ElasticApm.Persistence.Entity;
+
+    namespace Sample.ElasticApm.Persistence.Context;
+
+    public class SampleDataContext : DbContext
+    {
+        public SampleDataContext(DbContextOptions<SampleDataContext> options)
+            : base(options)
+        {
+
+        }
+
+        public virtual DbSet<Pessoa> Pessoas { get; set; }
+    }
+
+       */
+
+
+
+
+
+
+
+        // [HttpPost]
+        // public IActionResult SendToDataBase([FromBody] object requestBody)
+        // {
+        //     try
+        //     {
+        //         _logger.LogInformation("Corpo da solicitação recebido: {requestBody}", requestBody);
+
+        //         // Converta requestBody para o tipo adequado, se necessário
+        //         double result = Convert.ToDouble(requestBody); // Exemplo de conversão para double
+
+        //         using (var connection = new SqlConnection(_connectionString))
+        //         {
+        //             // connection.Open();
+        //             // _logger.LogInformation("Dados enviados para teste: {result}", result);
+        //             // // Aqui você pode salvar o resultado no banco de dados
+        //             return Ok(new { message = "enviado com sucesso" }); // Resposta como objeto JSON
+        //         } 
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         // Log or handle the exception accordingly
+        //         // _logger.LogError(ex, "Erro ao salvar o resultado na base de dados.");
+        //         return StatusCode(500, new { error = "Ocorreu um erro ao salvar o resultado na base de dados." }); // Resposta como objeto JSON
+        //     }
+        // }
 
     }
-}
+

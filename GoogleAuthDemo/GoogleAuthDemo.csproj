@@ -9,6 +9,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="Elastic.Apm.NetCoreAll" Version="1.27.0" />
+		<PackageReference Include="Elastic.Apm.SerilogEnricher" Version="8.11.0" />
+		<PackageReference Include="Elastic.CommonSchema.Serilog" Version="8.11.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.4" />
 		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.4" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.4" />
@@ -20,7 +22,10 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.2" />
+		<PackageReference Include="NEST" Version="7.17.5" />
 		<PackageReference Include="prometheus-net" Version="8.2.1" />
 		<PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
 		<PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
