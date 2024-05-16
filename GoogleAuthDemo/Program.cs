@@ -35,7 +35,7 @@ Log.Logger = new LoggerConfiguration()
         CustomFormatter = new EcsTextFormatter(),
         AutoRegisterTemplate = true,
         IndexFormat = "indexlogs",
-      /*  ModifyConnectionSettings = x => x.BasicAuthentication(configuration["ElasticsearchSettings:username"], configuration["ElasticsearchSettings:password"])*/
+        /*  ModifyConnectionSettings = x => x.BasicAuthentication(configuration["ElasticsearchSettings:username"], configuration["ElasticsearchSettings:password"])*/
     })
     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
     .CreateLogger();
@@ -43,11 +43,16 @@ Log.Logger = new LoggerConfiguration()
 builder.Logging.ClearProviders();
 builder.Host.UseSerilog(Log.Logger, true);
 
+// Adicione a configuração para o serviço IElasticClient
+var elasticSearchUri = new Uri(configuration["ElasticsearchSettings:uri"]);
+builder.Services.AddSingleton<IElasticClient>(new ElasticClient(new ConnectionSettings(elasticSearchUri)));
+
 builder.Services.AddAuthentication().AddGoogle(googleOptions =>
 {
     googleOptions.ClientId = configuration["Authentication:Google:ClientId"];
     googleOptions.ClientSecret = configuration["Authentication:Google:ClientSecret"];
 });
+
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
