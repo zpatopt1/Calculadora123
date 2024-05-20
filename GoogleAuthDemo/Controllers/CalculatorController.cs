@@ -11,6 +11,7 @@ using GoogleAuthDemo.Data;
 using Nest;
 using Elastic.Apm.Api;
 using Elastic.Apm;
+using MyElasticsearchPlugin;
 using GoogleAuthDemo;
 
 
@@ -25,6 +26,7 @@ namespace GoogleAuthDemo.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ILogger<CalculatorController> _logger;
         private readonly IElasticClient _elasticClient;
+        private readonly MyPlugin _myPlugin;
 
         private static readonly Counter _sentDataCounter = Prometheus.Metrics.CreateCounter("data_sent_total", "Total number of data sent to the database");
         //private static readonly Histogram _sendDataDuration = Prometheus.Metrics.CreateHistogram("data_send_duration_seconds", "Duration of sending data to the database");                                    
@@ -35,6 +37,7 @@ namespace GoogleAuthDemo.Controllers
             _context = context;
             _logger = logger;
             _elasticClient = elasticClient;
+            _myPlugin = new MyPlugin();
         }
 
 
@@ -46,24 +49,18 @@ namespace GoogleAuthDemo.Controllers
 
 
 
-        public bool InternalWait()
+        public void InternalWait(int number)
         {
             var transaction = Agent.Tracer.CurrentTransaction;
-            var span = transaction.StartSpan("tempo", "internal_wait");
-
+            var span = transaction.StartSpan("Result", "internal_wait");
 
             try
             {
-              
-                Stopwatch stopwatch = Stopwatch.StartNew();
+                // Registrar o número
+                _logger.LogInformation("Número fornecido: {number}", number);
 
-                // Pausa de 2 segundos
-                System.Threading.Thread.Sleep(2000);
-
-                stopwatch.Stop();
-
-                // Registrar o tempo de espera
-                _logger.LogInformation("Tempo de espera: {milliseconds} milissegundos", stopwatch.ElapsedMilliseconds);
+                // Adicionar o número como label no span
+                span.Context.Labels["number"] = number.ToString();
 
                 // Por exemplo, o número de iterações no loop vazio
                 int iterations = 0;
@@ -73,23 +70,18 @@ namespace GoogleAuthDemo.Controllers
                 }
 
                 _logger.LogInformation("Número de iteracoes no loop vazio: {iterations}", iterations);
-
-            
-
-                // Retornar true se a espera for concluída com sucesso
-                return true;
             }
             catch (Exception ex)
             {
                 // Log de erro e retorno de status de erro
                 _logger.LogError(ex, "Erro durante a espera interna.");
-                return false;
             }
             finally
             {
                 span.End();
             }
         }
+
 
 
         public async Task SendToDataBaseTeste()
@@ -114,7 +106,7 @@ namespace GoogleAuthDemo.Controllers
                 }
 
                 // Incrementar o contador de dados enviados com sucesso
-                _sentDataCounter.Inc();
+                _sentDataCounter.Inc( );
             }
             catch (Exception ex)
             {
@@ -128,18 +120,33 @@ namespace GoogleAuthDemo.Controllers
         [HttpPost]
         public async Task<IActionResult> SendToDataBase([FromBody] ResultModel model)
         {
+            ITransaction transaction = Agent.Tracer.CurrentTransaction;
 
             try
             {
-                InternalWait();
-                InternalWait();
+                // Registre o número inicialmente
+                InternalWait((int)model.Result);
 
-                var transaction = Agent.Tracer.CurrentTransaction;
-                var span = transaction.StartSpan("Database Operation", "sql", "sql");
+                // Verifique se o resultado é par
+                if (model.Result % 2 == 0)
+                {
+                    // Inicie um span para documentar a espera adicional
+                    ISpan waitSpan = transaction.StartSpan("Waiting", "custom");
+                    waitSpan.Context.Labels["reason"] = "Result is even, adding delay";
+                    waitSpan.Context.Labels["number"] = model.Result.ToString();
+
+                    // Pausa de 2 segundos
+                    System.Threading.Thread.Sleep(2000);
+
+                    waitSpan.End();
+                }
+
+                // Inicie um span para a operação do banco de dados
+                ISpan dbSpan = transaction.StartSpan("Database Operation", "sql", "sql");
+
 
                 // Salvar os dados no banco de dados
                 _context.Results.Add(model);
-
 
                 // Indexar o modelo no Elasticsearch
                 var response = await _elasticClient.IndexAsync(model, idx => idx
@@ -148,7 +155,6 @@ namespace GoogleAuthDemo.Controllers
 
                 await _context.SaveChangesAsync();
 
-
                 // Verificar se a operação de indexação foi bem-sucedida
                 if (!response.IsValid)
                 {
@@ -156,8 +162,7 @@ namespace GoogleAuthDemo.Controllers
                     throw new Exception("Erro ao indexar dados no Elasticsearch: " + response.OriginalException?.Message);
                 }
 
-                span.End();
-
+                dbSpan.End();
 
                 // Incrementar contador
                 _sentDataCounter.Inc();
@@ -170,13 +175,6 @@ namespace GoogleAuthDemo.Controllers
                 return StatusCode(500, "Ocorreu um erro ao salvar o resultado na base de dados e indexar no Elasticsearch.");
             }
         }
-
-
-
-
-
-
-
 
 
 

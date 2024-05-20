@@ -47,6 +47,7 @@ services:
     - cluster.routing.allocation.disk.threshold_enabled=false
     - discovery.type=single-node
     - ES_JAVA_OPTS=-XX:UseAVX=2 -Xms1g -Xmx1g
+
     ulimits:
       memlock:
         hard: -1
@@ -70,6 +71,8 @@ services:
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
       ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      xpack.encryptedSavedObjects.encryptionKey: "e7602552-7ba8-4902-83a5-b3e784dac4b6"
+      xpack.actions.enabled: true
     ports:
     - 5601:5601
     networks:

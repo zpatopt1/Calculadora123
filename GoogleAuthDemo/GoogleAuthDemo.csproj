@@ -8,6 +8,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="YAMLFile.yml" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Elastic.Apm.NetCoreAll" Version="1.27.0" />
 		<PackageReference Include="Elastic.Apm.SerilogEnricher" Version="8.11.0" />
 		<PackageReference Include="Elastic.CommonSchema.Serilog" Version="8.11.0" />
