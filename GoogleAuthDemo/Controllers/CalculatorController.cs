@@ -41,7 +41,7 @@ namespace GoogleAuthDemo.Controllers
         }
 
 
-        [Authorize]
+        // [Authorize]
         public IActionResult Index()
         {
             return View();

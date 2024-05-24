@@ -1,0 +1,57 @@
+{
+  "trigger": {
+    "schedule": {
+      "interval": "1m"
+    }
+  },
+  "input": {
+    "search": {
+      "request": {
+        "indices": [ "logs-*" ],
+        "body": {
+          "size": 0,
+          "query": {
+            "bool": {
+              "filter": {
+                "range": {
+                  "@timestamp": {
+                    "gte": "now-1m"
+                  }
+                }
+              },
+              "must": [
+                {
+                  "term": {
+                    "service": "web"
+                  }
+                }
+              ]
+            }
+          },
+          "aggs": {
+            "avg_duration": {
+              "avg": {
+                "field": "request.duration"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "condition": {
+    "script": {
+      "source": "ctx.payload.aggregations.avg_duration.value > 2000",
+      "lang": "painless"
+    }
+  },
+  "actions": {
+    "send_email": {
+      "email": {
+        "to": "azuresusbcricao@gmail.com",
+        "subject": "Alerta: Duração da Solicitação Excedida",
+        "body": "A média da duração das solicitações para o serviço da web excedeu 2 segundos no último minuto."
+      }
+    }
+  }
+}

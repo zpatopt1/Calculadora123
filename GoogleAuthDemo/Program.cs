@@ -21,6 +21,9 @@ CookiePolicyOptions cookiePolicy = new CookiePolicyOptions() { Secure = CookieSe
 var builder = WebApplication.CreateBuilder(args);
 
 var configuration = builder.Configuration;
+var host = builder.WebHost;
+
+host.UseUrls("http://*:8000");
 
 
 Log.Logger = new LoggerConfiguration()
@@ -43,7 +46,7 @@ Log.Logger = new LoggerConfiguration()
 builder.Logging.ClearProviders();
 builder.Host.UseSerilog(Log.Logger, true);
 
-// Adicione a configuração para o serviço IElasticClient
+// Adicione a configuraï¿½ï¿½o para o serviï¿½o IElasticClient
 var elasticSearchUri = new Uri(configuration["ElasticsearchSettings:uri"]);
 builder.Services.AddSingleton<IElasticClient>(new ElasticClient(new ConnectionSettings(elasticSearchUri)));
 

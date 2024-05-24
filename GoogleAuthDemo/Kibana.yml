@@ -1,27 +1,44 @@
-﻿# Kibana configuration file
-
-server.name: kibana
+elastic:
+  apm:
+    active: true
+    serverUrl: "http://fleet-server:8200"
+    secretToken: ${ELASTIC_APM_SECRET_TOKEN}
 server.host: "0.0.0.0"
-
-elasticsearch.hosts: ["http://elasticsearch:9200"]
-elasticsearch.username: "elastic"
-elasticsearch.password: "Yaquim123*"
-
-# Encrypted saved objects
-xpack.encryptedSavedObjects.encryptionKey: "f0da4f25d4b6bd5478dd7aff46cb8556"
-
-# Reporting encryption key
-xpack.reporting.encryptionKey: "e206276ee58a9c62c1aac33b702fb653"
-
-# Security encryption key
-xpack.security.encryptionKey: "6094bd093cb0dc8d20aa552d44914817"
-
-# Enable security features
-xpack.security.enabled: true
-
-# Optional settings
-logging.dest: stdout
-logging.level: info
-
-# Action settings
-xpack.actions.enabled: true
+telemetry.enabled: "true"
+xpack.fleet.packages:
+  - name: fleet_server
+    version: latest
+  - name: system
+    version: latest
+  - name: elastic_agent
+    version: latest
+  - name: apm
+    version: latest
+xpack.fleet.agentPolicies:
+  - name: Fleet-Server-Policy
+    id: fleet-server-policy
+    namespace: default
+    monitoring_enabled: 
+      - logs
+      - metrics
+    package_policies:
+      - name: fleet_server-1
+        package:
+          name: fleet_server
+      - name: system-1
+        package:
+          name: system
+      - name: elastic_agent-1
+        package:
+          name: elastic_agent
+      - name: apm-1
+        package:
+          name: apm
+        inputs:
+        - type: apm
+          enabled: true
+          vars:
+          - name: host
+            value: 0.0.0.0:8200
+          - name: secret_token
+            value: ${ELASTIC_APM_SECRET_TOKEN}
