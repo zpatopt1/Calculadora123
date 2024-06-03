@@ -7,8 +7,8 @@ xpack.fleet.packages:
     version: latest
   - name: elastic_agent
     version: latest
-  - name: kubernetes
-    version: latest
+  # - name: kubernetes
+  #   version: latest
   - name: ti_util
     version: latest
   - name: endpoint
@@ -49,39 +49,39 @@ xpack.fleet.agentPolicies:
                 value: 8200
               - name: url
                 value: "http://localhost:8200"
-  - name: kubernetes
-    id: kubernetes
-    is_default_fleet_server: true
-    is_managed: false
-    package_policies:
-      - name: elastic_agent_k8s
-        id: elastic-agent-k8s
-        package:
-          name: elastic_agent
-      - name: kubernetes
-        id: kubernetes
-        package:
-          name: kubernetes
-        inputs:
-          - type: filestream
-            enabled: true
-            streams:
-              - data_stream:
-                  dataset: kubernetes.container_logs
-                enabled: true
-                vars:
-                  - name: additionalParsersConfig
-                    value: |
-                      - ndjson:
-                          target: json
-                          ignore_decoding_error: true
-                          keys_under_root: true
-                          add_error_key: true
-                          message_key: message
-      - name: ti_util
-        id: ti-util
-        package:
-          name: ti_util
+  # - name: kubernetes
+  #   id: kubernetes
+  #   is_default_fleet_server: true
+  #   is_managed: false
+  #   package_policies:
+  #     - name: elastic_agent_k8s
+  #       id: elastic-agent-k8s
+  #       package:
+  #         name: elastic_agent
+  #     - name: kubernetes
+  #       id: kubernetes
+  #       package:
+  #         name: kubernetes
+  #       inputs:
+  #         - type: filestream
+  #           enabled: true
+  #           streams:
+  #             - data_stream:
+  #                 dataset: kubernetes.container_logs
+  #               enabled: true
+  #               vars:
+  #                 - name: additionalParsersConfig
+  #                   value: |
+  #                     - ndjson:
+  #                         target: json
+  #                         ignore_decoding_error: true
+  #                         keys_under_root: true
+  #                         add_error_key: true
+  #                         message_key: message
+  #     - name: ti_util
+  #       id: ti-util
+  #       package:
+  #         name: ti_util
 # Not possible, to configure it here
 #      - name: endpoint
 #        id: endpoint

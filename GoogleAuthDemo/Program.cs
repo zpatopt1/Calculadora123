@@ -38,7 +38,7 @@ Log.Logger = new LoggerConfiguration()
         CustomFormatter = new EcsTextFormatter(),
         AutoRegisterTemplate = true,
         IndexFormat = "indexlogs",
-        /*  ModifyConnectionSettings = x => x.BasicAuthentication(configuration["ElasticsearchSettings:username"], configuration["ElasticsearchSettings:password"])*/
+        ModifyConnectionSettings = x => x.BasicAuthentication(configuration["ElasticsearchSettings:username"], configuration["ElasticsearchSettings:password"])
     })
     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
     .CreateLogger();
@@ -46,9 +46,19 @@ Log.Logger = new LoggerConfiguration()
 builder.Logging.ClearProviders();
 builder.Host.UseSerilog(Log.Logger, true);
 
-// Adicione a configura��o para o servi�o IElasticClient
+// // Adicione a configura��o para o servi�o IElasticClient esta mal !!!!!!!!!
+// var elasticSearchUri = new Uri(configuration["ElasticsearchSettings:uri"]);
+// builder.Services.AddSingleton<IElasticClient>(new ElasticClient(new ConnectionSettings(elasticSearchUri)));
+
+// // Adicione a configuração para o serviço IElasticClient
 var elasticSearchUri = new Uri(configuration["ElasticsearchSettings:uri"]);
-builder.Services.AddSingleton<IElasticClient>(new ElasticClient(new ConnectionSettings(elasticSearchUri)));
+var defaultIndex = "logs"; // Defina o nome do índice padrão aqui
+var settings = new ConnectionSettings(elasticSearchUri)
+    .DefaultIndex(defaultIndex) // Defina o índice padrão aqui
+    .BasicAuthentication(configuration["ElasticsearchSettings:username"], configuration["ElasticsearchSettings:password"]);
+
+builder.Services.AddSingleton<IElasticClient>(new ElasticClient(settings));
+
 
 builder.Services.AddAuthentication().AddGoogle(googleOptions =>
 {
