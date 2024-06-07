@@ -1,7 +1,8 @@
----
+
 version: '3.8'
 
 services:
+
   fleet-server:
     image: docker.elastic.co/beats/elastic-agent:${ELASTIC__STACK_VERSION}
     restart: unless-stopped
@@ -79,6 +80,7 @@ services:
       interval: 10s
       retries: 12
       test: curl -s http://localhost:8200 | grep -q '"publish_ready":\ true'
+
 
   # filebeat:
   #   image: docker.elastic.co/beats/filebeat:${ELASTIC__STACK_VERSION}
@@ -197,6 +199,7 @@ services:
         soft: -1
     volumes:
       - esdata:/usr/share/elasticsearch/data
+      - C:/Users/eduar/Documents/GitHub/Calculadora123/GoogleAuthDemo:/usr/share/elasticsearch/scripts
     ports:
       - 9200:9200
     container_name: elasticsearch
@@ -207,32 +210,33 @@ services:
       test: curl -u elastic:$$ELASTIC_PASSWORD -s http://localhost:9200/_cluster/health | grep -vq '"status":"red"'
       interval: 20s
       retries: 10
+    command: cmd /c "C:\Users\eduar\Documents\GitHub\Calculadora123\GoogleAuthDemo\define_password.bat"
 
-  elasticsearch_setup:
-    image: alpine:${ALPINE_VERSION}
-    user: root #to store cluster_uuid
-    labels:
-      co.elastic.logs/enabled: false
-      co.elastic.metrics/enabled: false
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-    command: >
-      sh -c '
-        apk add curl;
-        echo "Waiting for Elasticsearch availability";
-        until curl -s -u elastic:${ELASTIC__INITIAL_PASSWORD} http://elasticsearch:9200/_cluster/health | grep -vq '"'"'"status":"red"'"'"'; do sleep 30; done;
-        echo "Setting kibana_system password";
-        until curl -s -X POST -u elastic:${ELASTIC__INITIAL_PASSWORD} -H "Content-Type: application/json" http://elasticsearch:9200/_security/user/kibana_system/_password -d '"'"'{"password":"${ELASTIC__INITIAL_PASSWORD}"}'"'"' | grep -q "^{}"; do sleep 10; done;
-        echo "Storing cluster_uuid";
-        until curl -s -u elastic:${ELASTIC__INITIAL_PASSWORD} http://elasticsearch:9200/ | grep cluster_uuid | awk '"'"'{split($0,a,":"); print a[2]}'"'"' | sed '"'"'s/[\", ]//g'"'"' > /usr/share/setup/cluster_uuid; do sleep 10; done;
-        echo "All done!";
-      '
-    container_name: elasticsearch_setup
-    volumes:
-      - elasticsearch_setup:/usr/share/setup
-    networks:
-      - oam
+  # elasticsearch_setup:
+  #   image: alpine:${ALPINE_VERSION}
+  #   user: root #to store cluster_uuid
+  #   labels:
+  #     co.elastic.logs/enabled: false
+  #     co.elastic.metrics/enabled: false
+  #   depends_on:
+  #     elasticsearch:
+  #       condition: service_healthy
+  #   command: >
+  #     sh -c '
+  #       apk add curl;
+  #       echo "Waiting for Elasticsearch availability";
+  #       until curl -s -u elastic:${ELASTIC__INITIAL_PASSWORD} http://elasticsearch:9200/_cluster/health | grep -vq '"'"'"status":"red"'"'"'; do sleep 30; done;
+  #       echo "Setting kibana_system password";
+  #       until curl -s -X POST -u elastic:${ELASTIC__INITIAL_PASSWORD} -H "Content-Type: application/json" http://elasticsearch:9200/_security/user/kibana_system/_password -d '"'"'{"password":"${ELASTIC__INITIAL_PASSWORD}"}'"'"' | grep -q "^{}"; do sleep 10; done;
+  #       echo "Storing cluster_uuid";
+  #       until curl -s -u elastic:${ELASTIC__INITIAL_PASSWORD} http://elasticsearch:9200/ | grep cluster_uuid | awk '"'"'{split($0,a,":"); print a[2]}'"'"' | sed '"'"'s/[\", ]//g'"'"' > /usr/share/setup/cluster_uuid; do sleep 10; done;
+  #       echo "All done!";
+  #     '
+  #   container_name: elasticsearch_setup
+  #   volumes:
+  #     - elasticsearch_setup:/usr/share/setup
+  #   networks:
+  #     - oam
 
   kibana:
     image: docker.elastic.co/kibana/kibana:${ELASTIC__STACK_VERSION}
@@ -246,8 +250,8 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
-      elasticsearch_setup:
-        condition: service_completed_successfully
+      # elasticsearch_setup:
+      #   condition: service_completed_successfully
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
       ELASTICSEARCH_HOSTS: http://elasticsearch:9200
@@ -257,8 +261,8 @@ services:
       XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: $ELASTIC__ENCRYPTION_KEY
       XPACK_SECURITY_ENCRYPTIONKEY: $ELASTIC__ENCRYPTION_KEY
       XPACK_REPORTING_ENCRYPTIONKEY: $ELASTIC__ENCRYPTION_KEY
-      XPACK_FLEET_AGENTS_FLEET_SERVER_HOSTS: '["http://fleet-server:8220"]'
-      XPACK_FLEET_AGENTS_ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+      # XPACK_FLEET_AGENTS_FLEET_SERVER_HOSTS: '["http://fleet-server:8220"]'
+      # XPACK_FLEET_AGENTS_ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
     volumes:
       - ./elastic/kibana.yml:/usr/share/kibana/config/kibana.yml
       - kibanadata:/usr/share/kibana/data
@@ -288,7 +292,7 @@ services:
         apk add curl;
         echo "Waiting for Kibana API availability";
         until curl -u kibana_system:$$ELASTICSEARCH_PASSWORD -f -s -o /dev/null http://kibana:5601/api/status; do sleep 30; done;
-       
+    
         echo "All done!";
       '
 # echo "Update default space";

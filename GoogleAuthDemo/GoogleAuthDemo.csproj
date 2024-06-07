@@ -28,6 +28,8 @@
 		</PackageReference>
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Graph" Version="5.55.0" />
+		<PackageReference Include="Microsoft.Identity.Client" Version="4.61.2" />
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.2" />
 		<PackageReference Include="NEST" Version="7.17.5" />
 		<PackageReference Include="prometheus-net" Version="8.2.1" />
