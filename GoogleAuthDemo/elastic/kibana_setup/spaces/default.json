@@ -1,7 +1,0 @@
-{
-    "id": "default",
-    "name": "Default",
-    "disabledFeatures": [
-        "enterpriseSearch"
-    ]
-}

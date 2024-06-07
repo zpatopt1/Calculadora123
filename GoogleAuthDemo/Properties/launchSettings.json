@@ -44,11 +44,4 @@
       "sslPort": 44353
     }
   },
-  "Docker": {
-    "commandName": "Docker",
-    "launchBrowser": true,
-    "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/Home",
-    "publishAllPorts": true,
-    "useSSL": true
-  }
 }
