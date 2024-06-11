@@ -15,16 +15,19 @@ using Elastic.CommonSchema.Serilog;
 using Elastic.Apm.SerilogEnricher;
 using Microsoft.Extensions.Logging;
 using GoogleAuthDemo.Services;
-
-
-CookiePolicyOptions cookiePolicy = new CookiePolicyOptions() { Secure = CookieSecurePolicy.Always, MinimumSameSitePolicy = SameSiteMode.None };
+using Microsoft.Identity.Web;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.Identity.Web.UI;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var configuration = builder.Configuration;
 var host = builder.WebHost;
 
-host.UseUrls("http://*:5178");
+host.UseUrls("https://*:44321");
 
 builder.Services.AddScoped<B2CUsersService>();
 
@@ -45,11 +48,10 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
     .CreateLogger();
 
-
 builder.Logging.ClearProviders();
 builder.Host.UseSerilog(Log.Logger, true);
 
-// Adicione a configuração para o serviço IElasticClient
+// Add ElasticSearch client
 var elasticSearchUri = new Uri(configuration["ElasticsearchSettings:uri"]);
 var elasticSearchUsername = configuration["ElasticsearchSettings:username"];
 var elasticSearchPassword = configuration["ElasticsearchSettings:password"];
@@ -74,18 +76,44 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
+builder.Services.AddMicrosoftIdentityWebAppAuthentication(configuration, "AzureAdB2C");
+
+builder.Services.AddMvc(options =>
+{
+    var policy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+    options.Filters.Add(new AuthorizeFilter(policy));
+}).AddMicrosoftIdentityUI();
+
 builder.Services.AddControllersWithViews();
 
+// Additional services configuration
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+    options.CheckConsentNeeded = context => true;
+    options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
+    // Handling SameSite cookie according to https://docs.microsoft.com/en-us/aspnet/core/security/samesite?view=aspnetcore-3.1
+    options.HandleSameSiteCookieCompatibility();
+});
+
 var app = builder.Build();
-app.UseCookiePolicy(cookiePolicy);
+app.UseCookiePolicy(new CookiePolicyOptions()
+{
+    Secure = CookieSecurePolicy.Always,
+    MinimumSameSitePolicy = SameSiteMode.None
+});
 
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
     app.UseAllElasticApm(configuration);
+    // //  app.UseDeveloperExceptionPage();
+    // IdentityModelEventSource.ShowPII = true;
 }
- else
- {
+else
+{
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
@@ -95,7 +123,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseHttpMetrics();
 app.UseMetricServer();
-app.UseSerilogRequestLogging(); 
+app.UseSerilogRequestLogging();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -106,6 +134,16 @@ app.UseEndpoints(endpoints =>
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}");
 
+
+    // Requer autenticação para outras rotas
+    endpoints.MapControllerRoute(
+        name: "secure",
+        pattern: "{controller}/{action}/{id?}",
+        defaults: null,
+        constraints: null,
+        dataTokens: new { RequiresAuthentication = true });
+
+        
     endpoints.MapMetrics();
 
     endpoints.MapControllerRoute(
@@ -113,8 +151,5 @@ app.UseEndpoints(endpoints =>
         pattern: "{controller=Calculator}/{action=Index}");
 });
 
-
 app.MapRazorPages();
 app.Run();
-
-

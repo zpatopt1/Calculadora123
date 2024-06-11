@@ -22,7 +22,7 @@ namespace GoogleAuthDemo.Controllers
     public class CalculatorController : Controller
     {
 
-     
+
         private readonly ApplicationDbContext _context;
         private readonly ILogger<CalculatorController> _logger;
         private readonly IElasticClient _elasticClient;
@@ -35,7 +35,7 @@ namespace GoogleAuthDemo.Controllers
             _context = context;
             _logger = logger;
             _elasticClient = elasticClient;
-        
+
         }
 
 
@@ -104,7 +104,7 @@ namespace GoogleAuthDemo.Controllers
                 }
 
                 // Incrementar o contador de dados enviados com sucesso
-                _sentDataCounter.Inc( );
+                _sentDataCounter.Inc();
             }
             catch (Exception ex)
             {
@@ -173,12 +173,6 @@ namespace GoogleAuthDemo.Controllers
                 return StatusCode(500, "Ocorreu um erro ao salvar o resultado na base de dados e indexar no Elasticsearch.");
             }
         }
-
-
-
-
-
-
 
     }
 }
