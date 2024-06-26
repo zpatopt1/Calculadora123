@@ -27,7 +27,7 @@ var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 var host = builder.WebHost;
 
-host.UseUrls("https://*:44321");
+host.UseUrls("http://*:44321");
 
 builder.Services.AddScoped<B2CUsersService>();
 
