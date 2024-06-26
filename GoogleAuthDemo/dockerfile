@@ -24,3 +24,4 @@ EXPOSE 8000
 
 # Command to run the application
 ENTRYPOINT ["dotnet", "GoogleAuthDemo.dll"]
+ENTRYPOINT ["dotnet", "GoogleAuthDemo.dll", "--urls", "http://*:8000"]
