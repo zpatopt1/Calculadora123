@@ -1,0 +1,13 @@
+pipeline {
+    agent { 
+        node {
+            label 'any'
+            }
+      }
+    triggers {
+        pollSCM '* * * * *'
+    }
+    stages {
+        
+    }
+}
