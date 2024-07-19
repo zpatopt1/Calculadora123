@@ -4,9 +4,6 @@ pipeline {
             label 'any'
             }
       }
-    triggers {
-        pollSCM '* * * * *'
-    }
     stages {
         
     }
